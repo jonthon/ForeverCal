@@ -574,9 +574,9 @@ if __name__ == '__main__':
     
     # CLI args
     parser = ArgumentParser()
-    parser.add_argument('-y', type=int, help='year, prints the year.')
-    parser.add_argument('-m', type=int, help='month, prints the month.')
-    parser.add_argument('-d', type=int, help='day, prints the day.')
+    parser.add_argument('-y', type=int, help='prints the year.')
+    parser.add_argument('-m', type=int, help='must pass -y. prints the month.')
+    parser.add_argument('-d', type=int, help='must pass -y and -m. prints the date.')
     args = parser.parse_args()
     y, m, d = args.y, args.m, args.d
     
@@ -591,7 +591,7 @@ if __name__ == '__main__':
                  'Saturday', 
                  'Sunday'][today.weekday()])
     
-    # print year
+    # print date
     if y and m and d:
         print(date(y, m, d))
         
@@ -601,7 +601,7 @@ if __name__ == '__main__':
         isleap = Gregorian(y).isleap()
         print(PresentableMonth(m, isleap, wday1))
         
-    # print date
+    # print year
     elif y:
         wday1 = date(y, 1, 1).weekday()
         print(PresentableGregorian(y, wday1))
