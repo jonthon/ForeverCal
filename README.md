@@ -30,6 +30,25 @@ USAGE:
 
 This module can be imported just like any other python module with no dependencies, or can be run as a top level file and get specific output depending on the CLI argument specified (-y yearnum, -m monthnum, -d daynum). Run 'python forevercal.py -h' for help on top level script usage.
 
+EXAMPLES:
+--------
+
+```
+jon@jons-linux:~$ python3 forevercal.py -y 2023 -m 6 -d 9
+Friday, Jun 9 2023
+jon@jons-linux:~$ python3 forevercal.py -y 2023 -m 6 
+          June 
+Sun Mon Tue Wed Thu Fri Sat
+                 1   2   3 
+ 4   5   6   7   8   9   10
+ 11  12  13  14  15  16  17
+ 18  19  20  21  22  23  24
+ 25  26  27  28  29  30    
+
+
+jon@jons-linux:~$ 
+```
+
 
 TBD:
 ----
