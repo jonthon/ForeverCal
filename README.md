@@ -32,6 +32,7 @@ This module can be imported just like any other python module with no dependenci
 
 EXAMPLES:
 --------
+- When run as a script
 
 ```
 jon@jons-linux:~$ python3 forevercal.py -y 2023 -m 6 -d 9
