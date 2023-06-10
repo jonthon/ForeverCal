@@ -106,6 +106,50 @@ Sun Mon Tue Wed Thu Fri Sat
 >>> 
 ```
 
+- `PresentableDate` interface
+
+```
+jon@jons-linux:~$ python3 -q
+>>> import calendar
+>>> from datetime import datetime
+>>> 
+>>> import forevercal as cal
+>>> 
+>>> #########################################
+>>> # create genesis date
+>>> #########################################
+>>> # python weekdays mapper
+>>> wkdays = ['Monday',
+...           'Tuesday',
+...           'Wednesday',
+...           'Thursday',
+...           'Friday',
+...           'Saturday',
+...           'Sunday',]
+>>> today = datetime.today()
+>>> today
+datetime.datetime(2023, 6, 10, 11, 57, 13, 100626)
+>>> 
+>>> # forevercal genesis date (today)
+>>> today = cal.PresentableDate(today.year, today.month, today.day, wkdays[today.weekday()])
+>>> print(today)
+Saturday, Jun 10 2023
+>>> 
+>>>
+>>> ########################################
+>>> # generate other dates from genesis date
+>>> ########################################
+>>> # 08/20/1972 < today
+>>> date = today(1972, 8, 20)
+>>> print(date)
+Sunday, Aug 20 1972
+>>> 
+>>> # 02/29/(4 ** 10) > today 
+>>> date = today(4 ** 10, 2, 29)
+>>> print(date)
+Thursday, Feb 29 1048576
+>>> 
+```
 
 TBD:
 ----
