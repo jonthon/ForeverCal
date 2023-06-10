@@ -32,7 +32,7 @@ This module can be imported just like any other python module with no dependenci
 
 EXAMPLES:
 --------
-- `PresentableGregorian` interface (`Presentable*` are similar). Output is cut short for space.
+- `PresentableGregorian` interface (`PresentableJulian` are similar). Output is cut short for space.
 
 ```
 jon@jons-linux:~/wanangu/lib/forevercal$ python3 -q
