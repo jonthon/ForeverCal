@@ -37,7 +37,7 @@ EXAMPLES:
 - `PresentableGregorian` interface (`PresentableJulian` are similar). Output is cut short for space.
 
 ```
-jon@jons-linux:~/wanangu/lib/forevercal$ python3 -q
+jon@jons-linux:~$ python3 -q
 >>> import forevercal as cal
 >>> 
 >>> # (01/01/2023) => 'Sunday'
@@ -89,7 +89,7 @@ Sun Mon Tue Wed Thu Fri Sat
 - `PresentableMonth` interface
 
 ```
-on@jons-linux:~$ python3 -q
+jon@jons-linux:~$ python3 -q
 >>> import forevercal as cal
 >>> 
 >>> # month=June, year=2023 => common year, (06/01/2023) => 'Thursday'
