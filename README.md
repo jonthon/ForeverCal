@@ -32,12 +32,15 @@ This module can be imported just like any other python module with no dependenci
 
 EXAMPLES:
 --------
-- When run as a script
+- `PresentableMonth` interface
 
 ```
-jon@jons-linux:~$ python3 forevercal.py -y 2023 -m 6 -d 9
-Friday, Jun 9 2023
-jon@jons-linux:~$ python3 forevercal.py -y 2023 -m 6 
+on@jons-linux:~$ python3 -q
+>>> import forevercal as cal
+>>> 
+>>> # month=June, year=2023 => common year, (06/01/2023) => 'Thursday'
+>>> m = cal.PresentableMonth(6, is_yr_leap=False, day1_weekday='Thursday')
+>>> print(m)
           June 
 Sun Mon Tue Wed Thu Fri Sat
                  1   2   3 
@@ -47,7 +50,8 @@ Sun Mon Tue Wed Thu Fri Sat
  25  26  27  28  29  30    
 
 
-jon@jons-linux:~$ 
+>>> 
+>>> 
 ```
 
 
