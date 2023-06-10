@@ -32,6 +32,120 @@ This module can be imported just like any other python module with no dependenci
 
 EXAMPLES:
 --------
+- `PresentableGregorian` interface (`Presentable*` are similar). Output is cut short for space.
+
+```
+jon@jons-linux:~/wanangu/lib/forevercal$ python3 -q
+>>> import forevercal as cal
+>>> 
+>>> # (01/01/2023) => 'Sunday'
+>>> y = cal.PresentableGregorian(2023, day1_weekday='Sunday')
+>>> print(y)
+            2023
+          January
+Sun Mon Tue Wed Thu Fri Sat
+ 1   2   3   4   5   6   7 
+ 8   9   10  11  12  13  14
+ 15  16  17  18  19  20  21
+ 22  23  24  25  26  27  28
+ 29  30  31                
+
+          February
+Sun Mon Tue Wed Thu Fri Sat
+             1   2   3   4 
+ 5   6   7   8   9   10  11
+ 12  13  14  15  16  17  18
+ 19  20  21  22  23  24  25
+ 26  27  28                
+
+          March
+Sun Mon Tue Wed Thu Fri Sat
+             1   2   3   4 
+ 5   6   7   8   9   10  11
+ 12  13  14  15  16  17  18
+ 19  20  21  22  23  24  25
+ 26  27  28  29  30  31    
+
+          April
+Sun Mon Tue Wed Thu Fri Sat
+                         1 
+ 2   3   4   5   6   7   8 
+ 9   10  11  12  13  14  15
+ 16  17  18  19  20  21  22
+ 23  24  25  26  27  28  29
+ 30                        
+
+          May  
+Sun Mon Tue Wed Thu Fri Sat
+     1   2   3   4   5   6 
+ 7   8   9   10  11  12  13
+ 14  15  16  17  18  19  20
+ 21  22  23  24  25  26  27
+ 28  29  30  31            
+
+          June 
+Sun Mon Tue Wed Thu Fri Sat
+                 1   2   3 
+ 4   5   6   7   8   9   10
+ 11  12  13  14  15  16  17
+ 18  19  20  21  22  23  24
+ 25  26  27  28  29  30    
+
+          July 
+Sun Mon Tue Wed Thu Fri Sat
+                         1 
+ 2   3   4   5   6   7   8 
+ 9   10  11  12  13  14  15
+ 16  17  18  19  20  21  22
+ 23  24  25  26  27  28  29
+ 30  31                    
+
+          August
+Sun Mon Tue Wed Thu Fri Sat
+         1   2   3   4   5 
+ 6   7   8   9   10  11  12
+ 13  14  15  16  17  18  19
+ 20  21  22  23  24  25  26
+ 27  28  29  30  31        
+
+          September
+Sun Mon Tue Wed Thu Fri Sat
+                     1   2 
+ 3   4   5   6   7   8   9 
+ 10  11  12  13  14  15  16
+ 17  18  19  20  21  22  23
+ 24  25  26  27  28  29  30
+
+          October
+Sun Mon Tue Wed Thu Fri Sat
+ 1   2   3   4   5   6   7 
+ 8   9   10  11  12  13  14
+ 15  16  17  18  19  20  21
+ 22  23  24  25  26  27  28
+ 29  30  31                
+
+          November
+Sun Mon Tue Wed Thu Fri Sat
+             1   2   3   4 
+ 5   6   7   8   9   10  11
+ 12  13  14  15  16  17  18
+ 19  20  21  22  23  24  25
+ 26  27  28  29  30        
+
+          December
+Sun Mon Tue Wed Thu Fri Sat
+                     1   2 
+ 3   4   5   6   7   8   9 
+ 10  11  12  13  14  15  16
+ 17  18  19  20  21  22  23
+ 24  25  26  27  28  29  30
+ 31                        
+
+
+>>> 
+```
+
+
 - `PresentableMonth` interface
 
 ```
