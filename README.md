@@ -12,9 +12,7 @@ MOTIVE:
 
 The main motive of this module is to improve explicitness from the built-in python weekday interface (```calendar.weekday```). 
 
-Python weekday hardcodes its index => weekday mapper: 0 => 'Mon', 1 => 'Tue', 2 => 'Wed', ... etc. Compared to this module, that mapper is True for genesis date 1/1/1. However, this module offers more flexibility to specify a custom genesis date (Yes, even today) with args ```(y, m, d, weekday)``` to ```*Date``` interfaces. The genesis date derives a new mapper that's compatible with any specified subject date (even earlier than the genesis date).
-
-However, just like python weekday interface, it works for any given year > 0.
+Python weekday hardcodes its index => weekday mapper: 0 => 'Mon', 1 => 'Tue', 2 => 'Wed', ... etc. Compared to this module, that mapper is True for genesis date 1/1/1. However, this module offers more flexibility to specify a custom genesis date (Yes, even today) with args ```(y, m, d, weekday)``` to ```*Date``` interfaces. The genesis date derives a new mapper that's compatible with any specified subject date (even earlier than the genesis date). However, it only works for any given year > 0.
 
 
 DESCRIPTION:
