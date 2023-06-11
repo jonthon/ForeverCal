@@ -150,8 +150,3 @@ Sunday, Aug 20 1972
 Thursday, Feb 29 1048576
 >>> 
 ```
-
-TBD:
-----
-
-Hybrid interfaces that imply both the Julian and Gregorian calendar features (ideal for per country calendars which have transitioned from one form to another).
