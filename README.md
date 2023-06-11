@@ -4,7 +4,7 @@
 NAME:
 -----
 
-```forevercal```, named to briefly describe its main functionality, determine the weekday of any given date; hence, its named forevercal after forever calendar.
+```forevercal``` is named after forever calendar. It determines a weekday of any date of any given year unless calendar semantics change in the future.
 
 
 MOTIVE:
