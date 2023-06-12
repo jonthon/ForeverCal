@@ -24,6 +24,8 @@ This module implements an algorithm for determining the weekday (Sun, Mon, Tue, 
 
 Values passed to the year, month, and date interfaces of this module are validated. For instance, invalid year, month, and day values raise ``OutOfRange`` instances if they are out of expected range (see their respective classes code for implementation). However, users should remember to handle these errors for better flow management. 
 
+Please, visit https://forevercal.readthedocs.io/en/latest/ for more.
+
 
 EXAMPLES:
 --------
