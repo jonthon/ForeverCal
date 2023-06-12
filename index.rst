@@ -28,7 +28,8 @@ Values passed to the year, month, and date interfaces of this module are validat
 ========
 EXAMPLES:
 ========
-- **``PresentableGregorian`` interface (``PresentableJulian`` is similar). Output is cut short for space.**
+
+- ``PresentableGregorian`` interface (``PresentableJulian`` is similar). Output is cut short for space.
 
 ::
 
@@ -79,7 +80,7 @@ EXAMPLES:
   >>> 
 
 
-- **`PresentableMonth` interface**
+- ``PresentableMonth`` interface
 
 :: 
 
@@ -102,7 +103,7 @@ EXAMPLES:
   >>> 
   
 
-- **`PresentableDate` interface**
+- ``PresentableDate`` interface
 
 ::
 
