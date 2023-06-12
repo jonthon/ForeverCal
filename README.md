@@ -18,7 +18,7 @@ Python weekday hardcodes its index => weekday mapper: 0 => 'Mon', 1 => 'Tue', 2 
 DESCRIPTION:
 ------------
 
-This module implements an algorithm for determining the weekday (Sun, Mon, Tue, ... etc) of any date given a known weekday of a prime date (genesis date). The algorithm was developed by the author of this module from scratch and tested locally, see the ``tests.py`` file and top level code in this file.
+This module implements an algorithm for determining the weekday (Sun, Mon, Tue, ... etc) of any date given a known weekday of a prime date (genesis date). The algorithm was developed by the author of this module from scratch and tested locally, see the top level code in this file.
 
 ``Presentable*`` classes are the recommended interfaces to use because they are the highest level interfaces, easy to use, and follow a simplicity approach. They are also reusable to various front ends: console, GUI, Web, ... etc. They define ``__str__`` for printing. ``Presentable*`` month and year interfaces define ``__iter__`` which makes them iterable, yielding weeks on demand. Ideal for use in GUI and Web frontends since ``__str__`` may not be suitable.
 
