@@ -1,612 +1,458 @@
+#! python
+from collections import deque
+from datetime    import datetime
 
 
 #######################################################################
-#   DEFAULTS (standard), customize how you want. See respective classes 
+# DEFAULTS (standard), customize how you want. See respective classes 
 # to see how.
 #######################################################################
 
-# *YRDAYS are meant to be constant
-                      # number of days in a:
+# *YRDAYS are meant to be constant.
+                     # number of days in a:
 _COMMON_YRDAYS = 365  # common year
 _LEAP_YRDAYS   = 366  # leap   year
 
-# default WEEKDAYS[index] => name, mapper
-#             ||
-#             vv
-# NOTE: data structures for customization; ie. names in different 
-# language or country or overall calendar (see also Month.MONTHDAYS)
-#
-# name = WEEKDAYS[index] 
-WEEKDAYS = ['Saturday',
-            'Sunday',
-            'Monday',
-            'Tuesday',
-            'Wednesday',
-            'Thursday',
-            'Friday',]
+# name = WEEKDAYS[index] default
+# NOTE: 
+#   data structures for customization; ie. names in different 
+#   language or country or overall calendar 
+_WEEKDAYS = ['Saturday',
+             'Sunday',
+             'Monday',
+             'Tuesday',
+             'Wednesday',
+             'Thursday',
+             'Friday',]
 
-# MONTHDAYS[index - 1] => (name, days), mapper
-#                ||
-#                vv
-# where index is month number - 1 leap month has two values in a tuple, 
-# where days = days[1] if yr_is_leap else days[0]
-MONTHDAYS =(['January',   (31,   )],
-            ['February',  (28, 29)], # leap month
-            ['March',     (31,   )],
-            ['April',     (30,   )],
-            ['May',       (31,   )],
-            ['June',      (30,   )],
-            ['July',      (31,   )],
-            ['August',    (31,   )],
-            ['September', (30,   )],
-            ['October',   (31,   )],
-            ['November',  (30,   )],
-            ['December',  (31,   )],)
-
+# MONTHDAYS[index - 1] => (name, days), mapper.
+# Where, index is month number - 1. Leap month has two values 
+# in a tuple; days = days[1] if yr_is_leap else days[0]
+_MONTHDAYS =(['January',   (31,   )],
+             ['February',  (28, 29)], # leap month
+             ['March',     (31,   )],
+             ['April',     (30,   )],
+             ['May',       (31,   )],
+             ['June',      (30,   )],
+             ['July',      (31,   )],
+             ['August',    (31,   )],
+             ['September', (30,   )],
+             ['October',   (31,   )],
+             ['November',  (30,   )],
+             ['December',  (31,   )],)
 
 
 #########################################################################
 # weekday formula, so cool
 #########################################################################
-def calendar_ix(yrday, c_yrs, l_yrs, *, wkdays, 
-                c_yrdays=_COMMON_YRDAYS, l_yrdays=_LEAP_YRDAYS):
+def date_index(yrday, cmmnyrs, leapyrs, wkdays=_WEEKDAYS, 
+                                        cmmnyrdays=_COMMON_YRDAYS, 
+                                        leapyrdays=_LEAP_YRDAYS):
     """
-    Returns index of a date relative to calendar. See Date class 
-    implementation for use case.
-
-    --------------------------------------------------------------------
-    Formula breakdown:
-            |
-            v
-    index = total % wkdays                                   ...(i)
-            |
-            v      
-    index = (cmmn + leap + yrday) % wkdays                   ...(i)
-            |
-            v
-    With modulus division distribution properties:
-    index = (cmmn  % wkdays + 
-             leap  % wkdays + 
-             yrday % wkdays ) % wkdays                       ...(i)
-                
-    Formula variables:
-        cmmn     => total days of all common years since genesis day
-        leap     => total days of all leap   years since genesis day
-        yrday    => number of the subject day relative to its year
-        wkdays   => number of days in a week
-        total    => total days (leap + cmmn + yrday) since genesis
-        
+    Returns an index of a date relative to its weekday name: 0 => Sat, 
+    or 1 => Sun, or 5 = > Thu etc.
+    
     args:
-        yrday    => (see Formula variables section)
-        c_yrs    => total number of common years since genesis
-        l_yrs    => total number of leap   years since genesis
-        wkdays   => (see Formula variables section)
-        c_yrdays => number of days in a common year
-        l_yrdays => number of days in a leap   year
-        
-    --------------------------------------------------------------------
+        yrday      => relative number of the date to its year
+        cmmnyrs    => total common years from genesis date
+        leapyrs    => total leap   years from genesis date
+        wkdays     => number of days in a week        (default 7)
+        cmmnyrdays => number of days in a common year (default 365)
+        leapyrdays => number of days in a leap   year (default 366)
     """
-    cmmn  = (c_yrs % wkdays) * (c_yrdays % wkdays)
-    leap  = (l_yrs % wkdays) * (l_yrdays % wkdays)
-    yrday = (yrday % wkdays)
-    total = sum(map(lambda n: n % wkdays, (cmmn, leap, yrday)))
+    #
+    #    cmmn      => total days of all common years since genesis date
+    #    leap      => total days of all leap   years since genesis date
+    #    total     => total days (leap + cmmn + yrday) since genesis
+
+    # Formula breakdown:
+    # --------------------------------------------------------------------
+    # index = total % wkdays                                   ...(i)
+    #          |
+    #          v      
+    # index = (cmmn + leap + yrday) % wkdays                   ...(i)
+    #          |
+    #          v
+    # With modulus division distribution properties:
+    # index = (cmmn  % wkdays + 
+    #          leap  % wkdays + 
+    #          yrday % wkdays ) % wkdays                       ...(i)
+    # --------------------------------------------------------------------
+    
+    cmmn  = (cmmnyrs % wkdays) * (cmmnyrdays % wkdays)
+    leap  = (leapyrs % wkdays) * (leapyrdays % wkdays)
+    yrday = (yrday   % wkdays)
+    total = sum(days % wkdays for days in (cmmn, leap, yrday))
     return  total % wkdays                      
 
-
-
-# it's made implicit accross multiple class namespaces, 
-# (so global name), see Date and Week. In short, it's for
-# reuse.
-def map_weekdays(weekday, weekday_ix, weekdays):
+def map_weekdays(name, index, wkdays=_WEEKDAYS):
     """
-    This function derives an index => weekday name mapper relative to 
-    the passed in arguments. Genesis dates use this interface to derive 
-    a global weekday mapper. 
-    
-    args:
-        weekday    => genesis weekday name
-        weekday_ix => genesis weekday index
-        weekdays   => weekday names
+    This function derives a weekdays mapper relative to the 
+    passed in name, index, and original mapper, wkdays. 
+    Genesis dates use this interface. 
     """
-    total      = len(weekdays)
-    old_wkdays = weekdays
-    new_wkdays = [None] * total
-    new_ix     = weekday_ix
-    old_ix     = old_wkdays.index(weekday)
-    for i in range(total):                           # rotate in old
-        old_ix = (old_ix + 1) % total                # and reflect in new
-        new_ix = (new_ix + 1) % total           
-        new_wkdays[new_ix] = old_wkdays[old_ix] 
-    return new_wkdays
-
-
-
-########################################################################
-# Custom Exceptions (for better control flow)
-########################################################################
-class OutOfRange(Exception):
-    """
-    Checks if num is in the expected range. Users are expected to 
-    customize the in_range method to return True for satisfaction and 
-    False if otherwise (raises exception implicitly). See Julian, Month, 
-    and Date classes for use cases.
-    """
-    
-    range_str = ''
-    
-    def __init__(self, num):
-        if not isinstance(num, int):
-            raise TypeError('[<int> required]')
-        msg  = 'value not in range: %s' 
-        msg %= self.range_str
-        Exception.__init__(self, msg)
-        if not self.in_range(num): raise self
-        
-    def in_range(self, num):
-        # customize in respective classes.
-        pass
-
-class DateNotGenesis(Exception):
-    """
-    raised when a non genesis date is misused to derive another date's 
-    weekday. Any date can be a genesis date but has to follow the 
-    protocol of explicitly specifying it's own weekday name or be 
-    derived from an explicit genesis date.
-    """
-    def __init__(self):
-        Exception.__init__('[operation is for genesis dates only]')
-
+    old = index - wkdays.index(name)
+    new = deque(list(wkdays))
+    new.rotate(old)
+    return list(new)
 
 
 ########################################################################
 # Year interfaces, have fun!
 ########################################################################
-class Julian:
+class Julian(int):
     """
     This is a year interface implemented with respect to the Julian 
-    calendar. It's the base class to all year interfaces defined in this 
-    module. 
-    
-    Raises Verify (OutOfRange subclass) defined in this class's scope 
-    for an invalid year arg.
-    """
-    
-    class Verify(OutOfRange):
-        range_str = 'yr > 0'
-        def in_range(self, yr):
-            return yr > 0
-            
-    def __init__(self, year):
-        self.Verify(year)
-        self.y = year
+    calendar. It's the base class to all year interfaces defined in 
+    this module. 
+    NOTE:
+        leapyrdays and cmmnyrdays are used to get days in 
+        year only, not the weekday of a date.
+    """  
+    LEAP_YRDAYS = _LEAP_YRDAYS
+    CMMN_YRDAYS = _COMMON_YRDAYS
 
-    def __repr__(self):
-        return '%s(%d)' % (self.__class__.__name__, self.y)
+    def __new__(cls, year): return int.__new__(cls, year)
 
     def days(self):
         "returns total days of this year"
-        if self.isleap():
-            return _LEAP_YRDAYS
-        return _COMMON_YRDAYS
+        if self.isleap(): return self.LEAP_YRDAYS
+        return self.CMMN_YRDAYS
 
     def isleap(self):
         "returns a bool based on if year is leap or not"
-        self.Verify(self.y)
-        return self.y % 4 == 0
+        return self % 4 == 0
 
-    def years_between(self, other):
-        "returns total (leap, common) years, max(self, other) inclusive"      
-        
-        # TBD:
-        # include negative signs for years lower than start year?
-        y1 = self.y
-        y2 = other
-        
-        if y1 == y2: return 0, 0             # same year, no difference.
-        
-        Year = self.__class__
-        
-        t1 = Year(y1).all_years()
-        t2 = Year(y2).all_years()
-        lyrs = t2[0] - t1[0]
-        cyrs = t2[1] - t1[1]
-        return lyrs, cyrs 
-
-    def all_years(self):
-        "returns total (leap, common) between 0 and self.y, exclusively"    
-        lyrs = self.leap_years()
-        cyrs = (self.y - 1) - lyrs
-        return lyrs, cyrs                   # total (leap, common) tuple
-
-    def leap_years(self):
-        "returns total leap years between 0 and self.y, exclusively."
-        self.Verify(self.y)
-        return (self.y - 1) // 4 
-
+    def leapyrs(self):
+        "returns total leap years between 0 and self, exclusively."
+        return (self - 1) // 4 
+    
+    def cmmnyrs(self):
+        "returns total common years between 0 and self, exclusively."
+        return (self - 1) - self.leapyrs()
+    
     # May not be customizable coz logic is not proved.
-    # But it works with defaults: WEEKDAYS, C_YRDAYS, L_YRDAYS, ...etc
-    def twin_years(self, other, *, wkdays, diff):
+    # But it works for defaults: WEEKDAYS, COMMON_YRDAYS, 
+    # LEAP_YRDAYS, ...etc
+    def twin_years(self, other, wkdays, diff):
         "yields repeating years inclusively on demand"
-        Year = self.__class__
-        yr, y2 = sorted([self.y, other])
+        yr, y2 = sorted([self, other])
         yield yr                              # yield own first
         while True:
             twin = yr + wkdays
-            lyrs = Year(yr - 1).years_between(twin - 1)[0]
+            lyrs = Julian(yr - 1).leapyrs() - Julian(twin - 1).leapyrs()
             twin -= lyrs
-            if lyrs == diff and Year(twin).isleap():
+            if lyrs == diff and Julian(twin).isleap():
                 yr   = twin
                 twin = yr + wkdays
-                lyrs = Year(yr).years_between(twin - 1)[0]
-                twin -= lyrs
+                lyrs = Julian(yr).leapyrs() - Julian(twin - 1).leapyrs()
+                twin-= lyrs
             yr = twin
             if yr > y2: return
-            if Year(yr).days() == self.days(): yield yr
-
+            if Julian(yr).days() == self.days(): yield yr
 
 class Gregorian(Julian):
     """
     This is a year interface with respect to the Gregorian calendar. It 
-    only customizes isleap and leap_years methods logic of the Julian 
-    class to implement Gregorian calendar.
+    customizes isleap and leapyrs methods logic of the Julian class to 
+    implement Gregorian calendar.
     """
 
     def isleap(self):
-        is_julian = Julian.isleap(self)
-        return (is_julian and self.y % 100 != 0) or (self.y % 400 == 0)
+        isJulian = Julian.isleap(self)
+        return (isJulian and self % 100 != 0) or (self % 400 == 0)
 
-    def leap_years(self):
-        lyrs = Julian.leap_years(self)
-        return (lyrs) - (lyrs // 25) + (lyrs // 100)
-
+    def leapyrs(self):
+        Julianyrs = Julian.leapyrs(self)
+        return (Julianyrs) - (Julianyrs // 25) + (Julianyrs // 100)
 
 
 ########################################################################
 # Month interfaces, how far can we go with customization?
 ########################################################################
-class Month:
+class Month(int):
     """
-    This is the base month interface. It takes a valid month (int) arg 
-    that satisfies 1 <= month <= 12 or Verify (OutOfRange subclass) is 
-    raised. is_yr_leap (bool), also passed along with month, tells if 
-    the year is leap or not; hence, it returns the correct days of this 
-    month depending on if the year is leap or not.
+    This is the base month interface. yr_is_leap (bool), also passed 
+    along with month, tells if the year is leap or not; hence, it 
+    returns the correct days of this month depending on if the year 
+    is leap or not.
     
-    MONTHDAYS is a ['name', (common, leap)] structure, where common and 
-    leap are month days respectively based on whether subject year is 
+    monthdays is a ['name', (common, leap)] structure, where common and 
+    leap are month days, respectively, based on whether subject year is 
     leap or not. leap is empty for non leap months. See global MONTHDAYS 
-    for more. This structure preserves constants in tuples such that 
-    only the month names are customizable, by in place change operations; 
-    custom language month names.
+    for more. This structure preserves days in tuples such that only the 
+    month names are customizable, not days. _MONTHDAYS is default unless 
+    specified during 
     """
-    from copy import deepcopy
-    MONTHDAYS = deepcopy(MONTHDAYS)
-            
-    def __init__(self, month, is_yr_leap):
-        
-        # in local scope so as to reference self, hence, MONTHDAYS
-        class Verify(OutOfRange):
-            range_str = "1 <= mth <= %d" % len(self.MONTHDAYS)
-            def in_range(verify, mth):
-                return 1 <= mth <= len(self.MONTHDAYS)
-        self.Verify     = Verify
-        
-        self.Verify(month)
-        self.m          = month
-        self.yr_is_leap = is_yr_leap
+    MONTHDAYS = _MONTHDAYS
 
-    def __repr__(self):
-        return '%s(%d, %s)' % (self.__class__.__name__, 
-                               self.m, 
-                               self.yr_is_leap)
+    def __new__(cls, month, yr_is_leap):
+        self = int.__new__(cls, month)
+        self.yr_is_leap = yr_is_leap
+        return self
 
-    def days(self):
+    def __str__(self):
+        return self.name()        
+
+    def days(self, monthdays=None):
         "returns total days of this month"
-        days  = self.MONTHDAYS[self.m - 1][1]
+        mdays = self.MONTHDAYS if not monthdays else monthdays
+        days  = mdays[self - 1][1]
         index = 1 if self.yr_is_leap and len(days) == 2 else 0
         return days[index]
-            
-    def prior_days(self):
+
+    def priordays(self, monthdays=None):
         "returns total days prior to this month, exclusively"
-        month = self.__class__(1, self.yr_is_leap)
+        month = Month(1, self.yr_is_leap)
         days  = 0
-        while month.m != self.m:        
-            days    += month.days()
-            month.m += 1
+        while month != self:        
+            days  += month.days(monthdays)
+            month += 1
+            month  = Month(month, self.yr_is_leap)
         return days
 
     def name(self):
         "returns the name of this month"
-        self.Verify(self.m)
-        return self.MONTHDAYS[self.m - 1][0]
+        return self.MONTHDAYS[self - 1][0]
 
 
 ########################################################################
 # Date Interface, the BEAST, the banger!!
 ########################################################################
-class Date:
-    """
-    
-    This is the base date interface. It embeds Gregorian and Month 
-    classes by default; they are assigned in this class's local scope, 
-    customize as desired.
-    
-    year, month, and day attrs are for referencing, not reassigning y, m, 
-    and d respectively.
-    
-    WEEKDAYS is a Date's attr that holds default weekday names. Ideal 
-    for custom language weekday names, customize as desired.
-    
-    Genesis date protocol:
-        A genesis date is any date with a known weekday name. Thus, they 
-        can derive other dates' weekday names.
+class BasicDate:
+    def __init__(self, year, month, day):
+        self.year  = (Gregorian(year) 
+                      if not isinstance(year, Julian) else year)
+        self.month = (Month(month, self.year.isleap())
+                      if not isinstance(month, Month) else month)
+        self.day   = int(day)
         
-    Example usage:
-        date  = Date(Y, M, D, weekday)    # genesis date
-        other = date(y, m, d)             # other   date
-        # to get weekday name
-        try:
-            wday = other.weekday()
-        #        OR
-        #   wday = date.weekday(y, m, d)
-        except DateNotGenesis:
-            # weekday raises this exception if weekday is 
-            # not determined or specified.
-            ...
-        else:
-            # if everything goes well, you get the weekday name 
-            # of the subject date.
-            # Thus, date, other, and other dates derived from 
-            # these are all genesis themselves.
-            ...
-    
-    """
-    Year     = Gregorian
-    Month    = Month
-    WEEKDAYS = list(WEEKDAYS)
-    
-    # for convenience
-    class Attr:
-        def __init__(attr, name):
-            attr.name = name
-        def __get__(attr, date, Date):
-            if   attr.name == 'year':  return date.y.y
-            elif attr.name == 'month': return date.m.m
-            elif attr.name == 'day':   return date.d
-        def __set__(*pargs, **kwargs):
-            raise Exception('[operation not supported]')      
-    year  = Attr('year')
-    month = Attr('month')
-    day   = Attr('day')
-
-    def __init__(self, y, m, d, genesis_weekday=None):
-        self.y = self.Year(y)
-        self.m = self.Month(m, self.y.isleap())
-        
-        # in local scope so as to reference self
-        class Verify(OutOfRange):
-            range_str = "0 <= day <= %d" % self.m.days()
-            def in_range(verify, day):
-                return 1 <= day <= self.m.days()
-        self.Verify = Verify
-        
-        self.Verify(d)
-        self.d = d
-        if genesis_weekday: self._weekday = genesis_weekday
-        
-    def __gt__(self, date):
-        "returns True if date is later, otherwise False"
-        y1, m1, d1 = self.y.y, self.m.m, self.d         # explicit names
-        y2, m2, d2 = date.y.y, date.m.m, date.d         # for readability
-
-        return ((y1 >  y2) or                           # check years
-                (y1 == y2 and m1 >  m2) or              # then months
-                (y1 == y2 and m1 == m2 and d1 > d2))    # finally days
-
-    def __ge__(self, date):
-        "returns True if date is later or equal to self, otherwise False"
-        islatter = self > date
-        return islatter or (islatter and self.d == date.d)
-    
-    def __call__(genesis, *pargs, **kwargs):
-        """
-        Derives the weekday of a customized Date instance, and returns a 
-        Date instance with known weekday (genesis).
-        """
-        # CustomDate is nested to remember genesis from enclosing 
-        # __call__ scope in calendar_ix local scope and not in instance 
-        # (date) namespace. If it aint simple, use other way; ie. 
-        # namespace, scope, etc
-        Genesis = genesis.__class__
-        class CustomDate(Genesis):
-            def calendar_ix(date):
-                yrday = abs(date.yearday())
-                yrs   = genesis.y.years_between(date.y.y)
-                return calendar_ix(yrday, yrs[1], yrs[0],
-                                   wkdays=len(genesis.WEEKDAYS)) 
-            def weekdays(date): return genesis.weekdays()     
-        genesis_weekday = CustomDate(*pargs, **kwargs).weekday()
-        return Genesis(*pargs[:3], genesis_weekday, **kwargs);
-
-    def yearday(self):
+    def yearday(self, monthdays=None):
         "returns the num of day in a year (default, 1 <= yd <= 366)."
-        self.Verify(self.d)
-        return self.m.prior_days() + self.d
-
-    def weekdays(self):
-        "returns an index => weekday name mapper for genesis mode"
-        try:
-            return map_weekdays(self._weekday,                      
-                               self.yearday() % len(self.WEEKDAYS),  
-                               self.WEEKDAYS)                        
-        except AttributeError:
-            raise DateNotGenesis
-                                                                              
-    def calendar_ix(self):
-        "returns the index of this date relative to calendar"
-        return self.yearday() % len(self.WEEKDAYS)
+        return self.month.priordays(monthdays) + self.day
+    
+    def weekday(self, genesis, **kwargs):
+        return genesis.weekday(self.year, self.month, self.day, **kwargs)
+        # you can literally pass Python's calendar module as genesis
         
-    def weekday(self, y=None, m=None, d=None):
-        "returns the weekday name; ie. Sun, Mon, Tue, ...etc."
-        # return own weekday 
-        if not (y and m and d): return self.weekdays()[self.calendar_ix()]
-        # or return (y, m, d) weekday
-        return self(y, m, d, None).weekday()
+class GenesisDate(BasicDate):
+    "These dates can solve other dates' weekdays"
+    WKDAYS      = _WEEKDAYS
+    CMMN_YRDAYS = Gregorian.CMMN_YRDAYS
+    LEAP_YRDAYS = Gregorian.LEAP_YRDAYS
 
-class PresentableDate(Date):
-    def __str__(self):
-        return (self.weekday() + ', ' + 
-                self.m.name()[:3:] + ' ' + 
-                str(self.d) + ' ' + str(self.y.y))
+    def __init__(self, year, month, day, weekday):
+        BasicDate.__init__(self, year, month, day)
+        self.wkday = weekday
 
+    def map_weekdays(self, name, mapper):
+        "returns an index => weekday name mapper for genesis mode"
+        index = self.yearday() % len(mapper)
+        return map_weekdays(name, index, mapper) 
+    
+    def weekday(self, y=None, m=None, d=None, **kwargs):
+        """
+        returns the weekday name; ie. Sun, Mon, Tue, ...etc.
+        kwargs: 
+            monthdays   => days in a month mapper
+            name        => genesis weekday name 
+            wkdays      => days in a week names mapper
+            cmmnyrdays  => days in a common year
+            leapyrdays  => days in a leap year
+        """
+        monthdays  = kwargs.get('monthdays')
+        name       = kwargs.get('name',       self.wkday)
+        wkdays     = kwargs.get('wkdays',     self.WKDAYS)
+        cmmnyrdays = kwargs.get('cmmnyrdays', self.CMMN_YRDAYS)
+        leapyrdays = kwargs.get('leapyrdays', self.LEAP_YRDAYS)
+        date       = BasicDate(y, m, d) if all((y, m, d)) else self
+        yrday      = date.yearday(monthdays)
+        cmmnyrs    = date.year.cmmnyrs() - self.year.cmmnyrs()
+        leapyrs    = date.year.leapyrs() - self.year.leapyrs()
+        index      = date_index(yrday, cmmnyrs, leapyrs, len(wkdays), 
+                                                         cmmnyrdays,
+                                                         leapyrdays)
+        return self.map_weekdays(name, wkdays)[index]
+        
+class Date(GenesisDate):
+    """
+    This is a hybrid (BasicDate and GenesisDate) date interface. 
+    It embeds Gregorian and Month classes by default.
+    
+    Genesis dates protocol:
+        A genesis date is a date with known weekday and can solve 
+        other dates' weekdays. All Date objectd are genesis dates. 
+        By default, today's date is the genesis unless a known 
+        weekday is passed to Date.
+        
+    Examples:
+        date1 = Date(Y, M, D, weekday)    # date1 is genesis
+        date1.weekday(y, m, d)            # it can now derive
+                                          # other dates' weekdays
 
+        date2 = Date(Y, M, D)             # date2 is also genesis
+        other.weekday()                   # it's weekday is derived
+                                          # from today's date
+
+        date3 = Date()                    # date3 is today's date
+        date3.weekday(y, m, d)            # default genesis
+    """
+    def __init__(self, year=None, month=None, day=None, weekday=None):
+        def today():
+            today   = datetime.today()
+            year    = today.year
+            month   = today.month
+            day     = today.day
+            weekday = map_weekdays('Monday', 0)[today.weekday()]
+            return year, month, day, weekday
+
+        ymdw  = year, month, day, weekday
+        if all(ymdw): 
+            GenesisDate.__init__(self, year, month, day, weekday)
+        elif all(ymdw[:-1]):
+            genesis = GenesisDate(*today())
+            weekday = genesis.weekday(year, month, day)
+            GenesisDate.__init__(self, year, month, day, weekday)
+        else:
+            GenesisDate.__init__(self, *today())
+    
+# ditto to python calendar.weekday. 
+# compatible as genesis with date.weekday(genesis, ...).
+weekday = Date().weekday
 
 ##########################################################################
 # week interfaces, here comes the presentation masterpiece!
 ##########################################################################
-class Week:
-    "Week instances yield weeks on demand based on provided args"
-    def __init__(self, start_weekday, start, stop, *, 
-                 weekday1, weekdays):
-        "Reusable interface that generates str() a month"
-        self.mapper = map_weekdays(weekday1, 0, weekdays)
-        self.index  = self.mapper.index(start_weekday)
-        self.start  = start
-        self.stop   = stop
+class PresentableDate(Date):
+    def __str__(self):
+        weekday = self.weekday() + ','
+        month   = self.month.name()
+        day     = str(self.day)
+        year    = str(self.year)
+        return ' '.join([weekday, month, day, year])
 
+class PresentableMonth(Month):
+    WKDAY1 = 'Sunday'
+    WKDAYS = PresentableDate.WKDAYS
+
+    def __new__(cls, *pargs, **kwargs):
+        year, month = pargs[:2]
+        year = Gregorian(year) if not isinstance(year, Julian) else year
+        self = Month.__new__(cls, month, year.isleap())
+        PresentableMonth.__init__(self, *pargs, **kwargs)
+        return self
+    
+    def __init__(self, year, month):
+        self.year   = year
+
+    def __str__(self): 
+        just, weeks = 3, []
+        for week in list(self):
+            days = self.repr_week(week, just)
+            weeks.append(' '.join(days))
+        names = map_weekdays(self.WKDAY1, 0, self.WKDAYS)
+        names = [day[:just] for day in names]
+        names = ' '.join(names)
+        me    = self.name().center((just + 1) * len(week))
+        weeks = [me, names] + weeks
+        return '\n'.join(weeks)
+    
     def __iter__(self):
-        yield from self.__week(self.index, self.start, self.stop)
+        yield from self.my_weeks()
 
-    def __week(self, index, start, stop):
-        week = [0] * len(self.mapper)
-        for day in range(start, stop + 1):
-            if not index % len(week) and any(week):
-                yield tuple(week)
-                week = [0] * len(self.mapper)
-            week[index % len(week)] = day
-            index += 1
+    def my_weeks(self, wkday1=None, **kwargs):
+        wkday1       = self.WKDAY1 if not wkday1 else wkday1
+        wkdays       = PresentableDate.WKDAYS
+        wkdays       = kwargs.get('wkdays', wkdays)
+        days, names  = self.days_and_names(**kwargs)
+        while len(names) > len(wkdays):
+            last  = names.index(wkday1, 1)
+            week  = days[:last]
+            names = names[last:]
+            days  = days[last:]
+            yield self.restructure_week(week, -1, wkdays);
         else:
-            yield tuple(week)
+            yield self.restructure_week(days, 1, wkdays)
 
-    def __str__(self):
-        # could improve logic to suit longer weekday names
-        names = ' '.join([n[:3].capitalize() for n in self.mapper])
-        clean = lambda d: ' %s' % str(d).ljust(2) if d else '   '
-        weeks = [' '.join(map(clean, w)) for w in self]
-        return '\n'.join([names] + weeks)
+    def repr_week(self, week, just):
+        days = []
+        for day in week:
+            day = str(day)
+            day = day.replace(str(None), '')
+            day = day.rjust(just)
+            days.append(day)
+        return days
+    
+    def days_and_names(self, **kwargs):
+        weekday = PresentableDate().weekday
+        days    = list(range(1, self.days() + 1))
+        y, m    = self.year, self
+        names   = [weekday(y, m, d, **kwargs) for d in days]  
+        return days, names
 
-class PresentableMonth(Month, Week):
-    def __init__(self, m, is_yr_leap, day1_weekday, *, 
-                 weekday1=None, weekdays=None, monthdays=None):
-        # assign defaults if values not passed:
-        weekday1  = 'Sunday'       if not weekday1 else weekday1
-        weekdays  = list(WEEKDAYS) if not weekdays else weekdays
-        if monthdays:
-            # change month names in place
-            for index, monthname in enumerate(monthdays):
-                self.MONTHDAYS[index][0] = monthname
-        # customize to make it Presentable
-        Month.__init__(self, m, is_yr_leap)
-        Week.__init__(self, day1_weekday, 1, self.days(), 
-                      weekday1=weekday1, weekdays=weekdays)
-                      
-     # Month presentation logic.
-     # Implicitly applied in the Presentable* classes
-    def __str__(self):
-        name = ''.ljust(10) + self.name().ljust(5) + '\n' 
-        return name + Week.__str__(self) + '\n\n'
+    def restructure_week(self, week, side, wkdays): 
+        empty = len(wkdays) - len(week)
+        empty = [None] * empty 
+        empty = empty + week if side < 0 else week + empty
+        return empty
 
-def PresentableYear(YearType):
-    "Year type wrapper"
-    class _PresentableYear(YearType):
-        def __init__(self, y, day1_weekday, **kwargs):
-            YearType.__init__(self, y)
-            
-            # customizes PresentableMonth for simplicity:
-            # **kwargs are passed once and not on each call.
-            # Also reused in __iter__.
-            class DisplayMonth(PresentableMonth):
-                def __init__(self, m, is_yr_leap, 
-                             day1_weekday=day1_weekday):
-                    PresentableMonth.__init__(self, m, is_yr_leap, 
-                                              day1_weekday, **kwargs)
-            # customizes Date to keep Date features in sync:
-            # Year, Month, WEEKDAYS
-            class DisplayDate(PresentableDate):
-                Year  = YearType
-                Month = DisplayMonth
-                if 'weekdays' in kwargs: WEEKDAYS = kwargs['weekdays']
-                
-            self.DisplayMonth = DisplayMonth
-            self.date         = DisplayDate(self.y, 1, 1, day1_weekday)
-        
-        # reuses self.DisplayMonth to append each month str()
-        def __iter__(self):
-            self._str = ''          # for reuse in self.__str__()
-            for M, ignore in enumerate(self.DisplayMonth.MONTHDAYS, 1):
-                yield (M,)          # yield month name first, then days
-                weekday1 = self.date.weekday(self.y, M, 1)
-                m = self.DisplayMonth(M, self.isleap(), weekday1)
-                self._str += str(m) # append month str() 
-                yield from m
-                
-        def __str__(self):
-                        # year num + year days grouped by months
-            list(self);
-            return ''.ljust(12) + str(self.y) + '\n' + self._str
-            
-    def twin_years(self, other, *, weekdays=list(WEEKDAYS), diff=2):
-        YearType.twin_years(self, other, wkdays=weekdays, diff=diff)
+class PresentableYear:
+    WKDAY1    = PresentableMonth.WKDAY1
+    WKDAYS    = PresentableMonth.WKDAYS
+    MONTHDAYS = PresentableMonth.MONTHDAYS
+    def months(self, iterator=list):
+        class Mth(PresentableMonth):
+            WKDAY1    = self.WKDAY1
+            WKDAYS    = self.WKDAYS
+            MONTHDAYS = self.MONTHDAYS
+        for m in range(len(Mth.MONTHDAYS)):
+            m = Mth(self, m + 1) 
+            m = iterator(m)
+            yield m
+    def __iter__(self):
+        yield from self.months()
+    def __str__(self): 
+        return (str(int(self)) + '\n') + '\n\n'.join(self.months(str))
 
-    return _PresentableYear
+class PresentableJulian(Julian,       PresentableYear): pass
 
-@PresentableYear
-class PresentableJulian(Julian):       pass
-
-@PresentableYear
-class PresentableGregorian(Gregorian): pass
+class PresentableGregorian(Gregorian, PresentableYear): pass 
 
 #####################################################
 # Top Level code
 #####################################################
 if __name__ == '__main__':
     import unittest, sys
-    from datetime import datetime
-    from forevercal import (Date, Gregorian as Greg, Month, 
-                            OutOfRange)
+    import calendar
+    from forevercal import (Gregorian, Month, Date)
+
+    names = map_weekdays('Monday', 0, _WEEKDAYS)
+    
+    def verbose(y):
+        if verbosity and y % 100 == 1: 
+            print('century:', y // 100 + 1) # current century
+        
+    def itermonth(tester, genesis, y):
+        months = range(1, 12 + 1, 1)
+        for m in months:
+            m       = Month(m, y.isleap())                  
+            genesis = iterdays(tester, genesis, y, m)
+            return genesis
+        
+    def iterdays(tester, genesis, y, m):
+        days = range(1, m.days() + 1, 1)
+        for d in days:
+            my_wkday = genesis.weekday( y, m, d)
+            py_wkday = calendar.weekday(y, m, d)
+            py_wkday = names[py_wkday]
+            tester.assertEqual(my_wkday.lower(), py_wkday.lower()) # test
+            genesis  = Date(y, m, d, my_wkday)
+            return genesis
 
     class ForeverCalTests(unittest.TestCase):
         def setUp(self): print()
-        
-        def test_date_attrs(self):
-            today   = datetime.today()
-            y, m, d = today.year, today.month, today.day
-            date = Date(y, m, d)
-            for values in zip([date.year, date.month, date.day], 
-                            [y, m, d]):
-                self.assertEqual(*values)
-            def func(n): date.year = n
-            self.assertRaises(Exception, func, 0)
 
-        def test_in_range(self):
-            """
-            Testing if the values passed are in range.
-
-            In these, year = 0, month = 0 or 13, day = 0 or 32.
-            """
-            self.assertRaises(OutOfRange, Greg,  0)             # year  = 0
-            self.assertRaises(OutOfRange, Month, 0,  False)     # month = 0
-            self.assertRaises(OutOfRange, Month, 13, False)     # month = 13
-            self.assertRaises(OutOfRange, Date,  1, 1, 0)       # day   = 0
-            self.assertRaises(OutOfRange, Date,  1, 1, 32)      # day   = 32
-            
-        def test_yrdays(self):
-            "testing if common and leap years are right"
-            self.assertEqual(Greg(4).days(), 366)
-            self.assertEqual(Greg(5).days(), 365)
-
-
-        def test_weekday(self):
+        def testWeekday(self):
             """
             Testing if forevercal weekday == pyhton weekday.
             All core interfaces for Julian, Month, and Date
@@ -620,46 +466,15 @@ if __name__ == '__main__':
             This is the core test. If this fails, nothing 
             else in the interface matters.
             """
-            import calendar
-            
-            today = datetime.today()
-            date  = Date(today.year, today.month, today.day,
-                        ['Monday', 
-                        'Tuesday', 
-                        'Wednesday', 
-                        'Thursday', 
-                        'Friday', 
-                        'Saturday', 
-                        'Sunday'][today.weekday()])     # true genesis
-
-            # test logic
-            century = 1                              
-            for y in range(1, datetime.today().year + 1, 1):
-
-                # -v (verbosity)
-                global verbose
-                if verbose and ((y < 100 and century == 1) or 
-                                y % 100 == 1):
-                    print('century:', century)
-                    century += 1
-
-                Y = Greg(y)                                    # year
-                for m in range(1, 12 + 1, 1):
-                    M = Month(m, Y.isleap())                   # month
-                    for d in range(1, M.days() + 1, 1):
-                        date       = date(y, m, d)             # date
-                        fc_weekday = date.weekday()
-                        # fc_weekday = date.weekday(y, m, d)   # alt
-                        py_weekday = calendar.weekday(y, m, d)
-                        py_weekday = ['Monday',                # weekday
-                                    'Tuesday',                 # names
-                                    'Wednesday',
-                                    'Thursday',
-                                    'Friday',
-                                    'Saturday',
-                                    'Sunday'][py_weekday]
-                        # test operation
-                        self.assertEqual(
-                            fc_weekday.lower(), py_weekday.lower())
-    verbose = True if '-v' in sys.argv else False
+            genesis = Date(end, 1, 1) if end else Date() # true genesis, 
+            years   = range(1, genesis.year + 1, 1)                              
+            for y in years:
+                verbose(y)
+                y       = Gregorian(y)                                    
+                genesis = itermonth(self, genesis, y)
+    verbosity = True if sys.argv[1] == '-v' else False
+    try:
+        end = sys.argv.pop(2)
+    except:
+        end = datetime.today().year
     unittest.main()
