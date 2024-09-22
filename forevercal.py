@@ -412,7 +412,9 @@ class PresentableYear:
     def __iter__(self):
         yield from self.months()
     def __str__(self): 
-        return (str(int(self)) + '\n') + '\n\n'.join(self.months(str))
+        temp = str(int(self))
+        temp = temp.center(len(self.WKDAYS) * 4)
+        return (temp + '\n') + '\n\n'.join(self.months(str))
 
 class PresentableJulian(Julian,       PresentableYear): pass
 
