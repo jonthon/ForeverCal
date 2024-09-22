@@ -243,7 +243,7 @@ class GenesisDate(BasicDate):
 
     def __init__(self, year, month, day, weekday):
         BasicDate.__init__(self, year, month, day)
-        self.wkday = weekday
+        self._wkday = weekday
 
     def map_weekdays(self, name, mapper):
         "returns an index => weekday name mapper for genesis mode"
@@ -261,7 +261,7 @@ class GenesisDate(BasicDate):
             leapyrdays  => days in a leap year
         """
         monthdays  = kwargs.get('monthdays')
-        name       = kwargs.get('name',       self.wkday)
+        name       = kwargs.get('name',       self._wkday)
         wkdays     = kwargs.get('wkdays',     self.WKDAYS)
         cmmnyrdays = kwargs.get('cmmnyrdays', self.CMMN_YRDAYS)
         leapyrdays = kwargs.get('leapyrdays', self.LEAP_YRDAYS)
@@ -362,7 +362,7 @@ class PresentableMonth(Month):
 
     def my_weeks(self, wkday1=None, **kwargs):
         wkday1       = self.WKDAY1 if not wkday1 else wkday1
-        wkdays       = PresentableDate.WKDAYS
+        wkdays       = self.WKDAYS
         wkdays       = kwargs.get('wkdays', wkdays)
         days, names  = self.days_and_names(**kwargs)
         while len(names) > len(wkdays):
@@ -424,7 +424,9 @@ class PresentableGregorian(Gregorian, PresentableYear): pass
 if __name__ == '__main__':
     import unittest, sys
     import calendar
-    from forevercal import (Gregorian, Month, Date)
+    from forevercal import (PresentableGregorian as Year, 
+                            PresentableMonth     as Month, 
+                            PresentableDate      as Date)
 
     names = map_weekdays('Monday', 0, _WEEKDAYS)
     
@@ -435,7 +437,7 @@ if __name__ == '__main__':
     def itermonth(tester, genesis, y):
         months = range(1, 12 + 1, 1)
         for m in months:
-            m       = Month(m, y.isleap())                  
+            m       = Month(y, m)                  
             genesis = iterdays(tester, genesis, y, m)
             return genesis
         
@@ -470,7 +472,7 @@ if __name__ == '__main__':
             years   = range(1, genesis.year + 1, 1)                              
             for y in years:
                 verbose(y)
-                y       = Gregorian(y)                                    
+                y       = Year(y)                                    
                 genesis = itermonth(self, genesis, y)
     verbosity = True if sys.argv[1] == '-v' else False
     try:
