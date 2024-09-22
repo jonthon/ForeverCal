@@ -1,1 +1,1 @@
-# empty
+pygments_style = 'sphinx'
