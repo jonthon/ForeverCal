@@ -81,22 +81,17 @@ Mon Tue Wed Thu Fri Sat Sun
 
 ```
 jon@jons-linux:~$ python3 -q
->>> import forevercal as cal
->>> 
->>> # month=June, year=2023 => common year, (06/01/2023) => 'Thursday'
->>> m = cal.PresentableMonth(6, is_yr_leap=False, day1_weekday='Thursday')
->>> print(m)
-          June 
+>>> from forevercal import PresentableMonth as Month
+>>> today      = datetime.today()
+>>> this_month = Month(today.year, today.month)
+>>> print(this_month)
+         September          
 Sun Mon Tue Wed Thu Fri Sat
-                 1   2   3 
- 4   5   6   7   8   9   10
- 11  12  13  14  15  16  17
- 18  19  20  21  22  23  24
- 25  26  27  28  29  30    
-
-
->>> 
->>> 
+  1   2   3   4   5   6   7
+  8   9  10  11  12  13  14
+ 15  16  17  18  19  20  21
+ 22  23  24  25  26  27  28
+ 29  30
 ```
 
 - `PresentableDate` interface
