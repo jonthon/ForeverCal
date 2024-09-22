@@ -22,8 +22,6 @@ This module implements an algorithm for determining the weekday (Sun, Mon, Tue, 
 
 ``Presentable*`` classes are the recommended interfaces to use because they are the highest level interfaces, easy to use, and follow a simplicity approach. They are also reusable to various front ends: console, GUI, Web, ... etc. They define ``__str__`` for printing. ``Presentable*`` month and year interfaces define ``__iter__`` which makes them iterable, yielding weeks on demand. Ideal for use in GUI and Web frontends since ``__str__`` may not be suitable.
 
-Documentation: https://forevercal.readthedocs.io/en/latest/
-
 
 EXAMPLES:
 --------
