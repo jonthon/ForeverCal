@@ -130,26 +130,6 @@ class Julian(int):
     def cmmnyrs(self):
         "returns total common years between 0 and self, exclusively."
         return (self - 1) - self.leapyrs()
-    
-    # May not be customizable coz logic is not proved.
-    # But it works for defaults: WEEKDAYS, COMMON_YRDAYS, 
-    # LEAP_YRDAYS, ...etc
-    def twin_years(self, other, wkdays, diff):
-        "yields repeating years inclusively on demand"
-        yr, y2 = sorted([self, other])
-        yield yr                              # yield own first
-        while True:
-            twin = yr + wkdays
-            lyrs = Julian(yr - 1).leapyrs() - Julian(twin - 1).leapyrs()
-            twin -= lyrs
-            if lyrs == diff and Julian(twin).isleap():
-                yr   = twin
-                twin = yr + wkdays
-                lyrs = Julian(yr).leapyrs() - Julian(twin - 1).leapyrs()
-                twin-= lyrs
-            yr = twin
-            if yr > y2: return
-            if Julian(yr).days() == self.days(): yield yr
 
 class Gregorian(Julian):
     """
