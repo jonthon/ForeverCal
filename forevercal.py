@@ -157,12 +157,11 @@ class Month(int):
     returns the correct days of this month depending on if the year 
     is leap or not.
     
-    monthdays is a ['name', (common, leap)] structure, where common and 
+    MONTHDAYS is a ['name', (common, leap)] structure, where common and 
     leap are month days, respectively, based on whether subject year is 
     leap or not. leap is empty for non leap months. See global MONTHDAYS 
     for more. This structure preserves days in tuples such that only the 
-    month names are customizable, not days. _MONTHDAYS is default unless 
-    specified during 
+    month names are customizable, not days. _MONTHDAYS is default.
     """
     MONTHDAYS = _MONTHDAYS
 
