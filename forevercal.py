@@ -310,6 +310,10 @@ class PresentableDate(Date):
         year    = str(self.year)
         return ' '.join([weekday, month, day, year])
 
+class PresentableJulianDate(PresentableDate):
+    CMMN_YRDAYS = Julian.CMMN_YRDAYS
+    LEAP_YRDAYS = Julian.LEAP_YRDAYS
+
 class PresentableMonth(Month):
     WKDAY1 = 'Sunday'
     WKDAYS = PresentableDate.WKDAYS
