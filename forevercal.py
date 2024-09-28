@@ -106,7 +106,7 @@ class Julian(int):
     calendar. It's the base class to all year interfaces defined in 
     this module. 
     NOTE:
-        leapyrdays and cmmnyrdays are used to get days in 
+        LEAP_YRDAYS and CMMN_YRDAYS are used to get days in 
         year only, not the weekday of a date.
     """  
     LEAP_YRDAYS = _LEAP_YRDAYS
